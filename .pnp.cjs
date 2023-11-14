@@ -27,7 +27,8 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./",\
         "packageDependencies": [\
           ["axios", "npm:1.6.1"],\
-          ["dotenv", "npm:16.3.1"]\
+          ["dotenv", "npm:16.3.1"],\
+          ["luxon", "npm:3.4.4"]\
         ],\
         "linkType": "SOFT"\
       }]\
@@ -59,7 +60,8 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["biostar", "workspace:."],\
           ["axios", "npm:1.6.1"],\
-          ["dotenv", "npm:16.3.1"]\
+          ["dotenv", "npm:16.3.1"],\
+          ["luxon", "npm:3.4.4"]\
         ],\
         "linkType": "SOFT"\
       }]\
@@ -122,6 +124,15 @@ const RAW_RUNTIME_STATE =
           ["asynckit", "npm:0.4.0"],\
           ["combined-stream", "npm:1.0.8"],\
           ["mime-types", "npm:2.1.35"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["luxon", [\
+      ["npm:3.4.4", {\
+        "packageLocation": "../../../../../.yarn/berry/cache/luxon-npm-3.4.4-c93f95dde8-10c0.zip/node_modules/luxon/",\
+        "packageDependencies": [\
+          ["luxon", "npm:3.4.4"]\
         ],\
         "linkType": "HARD"\
       }]\

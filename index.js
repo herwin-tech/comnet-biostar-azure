@@ -2,43 +2,50 @@ const azure = require('./lib/azure');
 const biostar = require('./lib/biostar');
 
 const main = async () => {
-  const azureUsers = await azure.getUsers();
-  const biostarUsers = biostar.getUsers();
 
-  console.log('MS users', azureUsers);
-  console.log('BIOS users', biostarUsers);
+  const biostarSessionId = await biostar.getSessionId();
+
+  const azureUsers = await azure.getUsers();
+  const biostarUsers = await biostar.getUsers(biostarSessionId);
+
+  const lastID = biostarUsers
+    .map(user => Number(user.user_id))
+    .sort((a, b) => a - b)
+    .pop();
 
   const usersToCreate = azureUsers
     .filter(azureUser =>
-      azureUser.mail && !biostarUsers.find(biostarUser => biostarUser.email.toLowerCase() === azureUser.mail.toLowerCase()
-      ));
-
-  const usersToEnable = azureUsers
-    .filter(azureUser =>
       azureUser.mail &&
-      biostarUsers.find(biostarUser =>
-        biostarUser.email.toLowerCase() === azureUser.mail.toLowerCase() &&
-        biostarUser.disabled,
-      ));
+      !biostarUsers
+        .find(biostarUser => biostarUser?.email?.toLowerCase() === azureUser?.mail?.toLowerCase()
+        ))
+    .map((user, index) => ({
+      ...user,
+      biostarID: lastID + index + 1
+    }));
 
   const usersToDisable = biostarUsers.filter(biostarUser =>
-    !azureUsers.find(
-      azureUser =>
-        !biostarUser.disabled &&
-        biostar.login_id !== "admin" &&
-        biostarUser.email.toLowerCase() === azureUser?.mail?.toLowerCase()
-    ));
+    biostarUser.email &&
+    biostarUser.disabled !== 'true' &&
+    biostarUser?.permission?.id !== '1' &&
+    !azureUsers.find(azureUser => azureUser?.mail?.toLowerCase() === biostarUser?.email?.toLowerCase())
+  );
 
-  const biostarSessionId = biostar.getSessionId();
-  const createResponse = biostar.createUsers(usersToCreate, biostarSessionId);
-  const enableResponse = biostar.toggleUsers(usersToEnable, biostarSessionId, false);
-  const disableResponse = biostar.toggleUsers(usersToDisable, biostarSessionId, false);
+  const usersToEnable = biostarUsers.filter(biostarUser =>
+    biostarUser.email &&
+    biostarUser.disabled === 'true' &&
+    azureUsers.find(azureUser => azureUser?.mail?.toLowerCase() === biostarUser?.email?.toLowerCase())
+  );
+
+  const createResponse = await biostar.createUsers(usersToCreate, biostarSessionId);
+  const disableResponse = await biostar.toggleUsers(usersToDisable, biostarSessionId, true);
+  const enableResponse = await biostar.toggleUsers(usersToEnable, biostarSessionId, false);
 
   console.log(
     createResponse,
-    enableResponse,
     disableResponse,
+    enableResponse,
   )
 };
 
-main()
+main();
